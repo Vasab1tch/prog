@@ -17,6 +17,12 @@ class Worker:
         return f"ID: {self.__id}, Name: {self.name}, Salary: {self.salary}"
     def __repr__(self):
         return self.__str__()
+    def __getattribute__(self,name):
+        try:
+            a=super().__getattribute__(name)
+        except AttributeError:
+            return None
+        return super().__getattribute__(name)
 class DeliveryWorker(Worker):
     def __init__(self, id, name, salary, duty):
         super().__init__(id, name, salary)
@@ -91,5 +97,20 @@ class WorkerDatabase:
                 self.save_data()
                 return
         print(f"Worker with id {old_id} not found.")
+    def sort_by(self, name):
+        if all(element.__getattribute__(name)==None for element in self.container):
+            print("no name like this")
+            return None
+        data=[]
+        for element in self.container:
+            if element.__getattribute__(name)!=None:
+                data.append(element)
+        return sorted(data,key=lambda x: x.__getattribute__(name))
+        
+        
+            
+        
+b=Worker(21,"biba", 2000)
 a=WorkerDatabase("file.csv")
 print(a.container)
+print(a.sort_by("responsibility"))
