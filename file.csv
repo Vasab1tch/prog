@@ -1,4 +1,4 @@
-id,name,salary
-1,biba,20000.0
-2,boba,1000.0
-3,boba,1000
+id,name,salary,duty,responsibility
+1,biba,20000.0,prog,
+2,boba,1000.0,,
+3,boba,1000,,eating

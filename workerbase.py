@@ -17,7 +17,22 @@ class Worker:
         return f"ID: {self.__id}, Name: {self.name}, Salary: {self.salary}"
     def __repr__(self):
         return self.__str__()
-
+class DeliveryWorker(Worker):
+    def __init__(self, id, name, salary, duty):
+        super().__init__(id, name, salary)
+        self.duty = duty
+    def __str__(self):
+        return f"ID: {self.get_id()}, Name: {self.name}, Salary: {self.salary}, Duty: {self.duty}"
+    def __repr__(self):
+        return self.__str__()
+class NonDeliveryWorker(Worker):
+    def __init__(self, id, name, salary, responsibility):
+        super().__init__(id, name, salary)
+        self.responsibility = responsibility
+    def __str__(self):
+        return f"ID: {self.get_id()}, Name: {self.name}, Salary: {self.salary}, responsibility: {self.responsibility}"
+    def __repr__(self):
+        return self.__str__()
 class WorkerDatabase:
     def __init__(self, file_name):
         self.file_name = file_name
@@ -31,17 +46,37 @@ class WorkerDatabase:
                 id = int(row['id'])
                 name = row['name']
                 salary = float(row['salary'])
-                worker = Worker(id, name, salary)
+                duty = row.get('duty')  
+                responsibility = row.get('responsibility')  
+
+                if duty != '':
+                    worker = DeliveryWorker(id, name, salary, duty)
+                elif responsibility != '':
+                    worker = NonDeliveryWorker(id, name, salary, responsibility)
+                else:
+                    worker = Worker(id, name, salary)
+
                 container.append(worker)
         return container
     def save_data(self):
         with open(self.file_name, 'w', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=['id', 'name', 'salary'])
+            writer = csv.DictWriter(file, fieldnames=['id', 'name', 'salary', 'duty', 'responsibility'])
             writer.writeheader()
             for worker in self.container:
-                writer.writerow({'id': worker.get_id(), 'name': worker.name, 'salary': worker.salary})
-    def add_worker(self, name, salary):
-        worker = Worker(self.next_id, name, salary)
+                if isinstance(worker, DeliveryWorker):
+                    writer.writerow({'id': worker.get_id(), 'name': worker.name, 'salary': worker.salary, 'duty': worker.duty, 'responsibility': ''})
+                elif isinstance(worker, NonDeliveryWorker):
+                    writer.writerow({'id': worker.get_id(), 'name': worker.name, 'salary': worker.salary, 'duty': '', 'responsibility': worker.responsibility})
+                else:
+                    writer.writerow({'id': worker.get_id(), 'name': worker.name, 'salary': worker.salary, 'duty': '', 'responsibility': ''})
+    def add_worker(self, name, salary, duty=None, responsibility=None):
+        if duty is not None:
+            worker = DeliveryWorker(self.next_id, name, salary, duty)
+        elif responsibility is not None:
+            worker = NonDeliveryWorker(self.next_id, name, salary, responsibility)
+        else:
+            worker = Worker(self.next_id, name, salary)
+            
         self.container.append(worker)
         self.save_data()
         self.next_id += 1
@@ -57,7 +92,4 @@ class WorkerDatabase:
                 return
         print(f"Worker with id {old_id} not found.")
 a=WorkerDatabase("file.csv")
-print(a.container)
-
-a.add_worker("boba",1000)
 print(a.container)
