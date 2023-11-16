@@ -1,5 +1,15 @@
 import csv
 
+def decsort(funk):
+    def inal(self,name):
+        print("sorted by: ",name)
+        return funk(self,name)
+    return inal
+def decsearch(funk):
+    def inal(self,key, name):
+        print("searched", name," by: ",key )
+        return funk(self,key,name)
+    return inal
 class Worker:
     def __init__(self, id, name, salary):
         self.__id = id  
@@ -97,6 +107,7 @@ class WorkerDatabase:
                 self.save_data()
                 return
         print(f"Worker with id {old_id} not found.")
+    @decsort
     def sort_by(self, name):
         if all(element.__getattribute__(name)==None for element in self.container):
             print("no name like this")
@@ -106,7 +117,28 @@ class WorkerDatabase:
             if element.__getattribute__(name)!=None:
                 data.append(element)
         return sorted(data,key=lambda x: x.__getattribute__(name))
-        
+    @decsearch
+    def search(self,key,name):
+        container = []
+        with open(self.file_name, 'r', newline='') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row[key]==name:
+                    id = int(row['id'])
+                    name = row['name']
+                    salary = float(row['salary'])
+                    duty = row.get('duty')  
+                    responsibility = row.get('responsibility')  
+
+                    if duty != '':
+                        worker = DeliveryWorker(id, name, salary, duty)
+                    elif responsibility != '':
+                        worker = NonDeliveryWorker(id, name, salary, responsibility)
+                    else:
+                        worker = Worker(id, name, salary)
+                    container.append(worker)
+        return container
+            
         
             
         
@@ -114,3 +146,4 @@ b=Worker(21,"biba", 2000)
 a=WorkerDatabase("file.csv")
 print(a.container)
 print(a.sort_by("responsibility"))
+print(a.search("name","boba"))
